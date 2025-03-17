@@ -22,3 +22,20 @@ jobs:
     steps:
       - name: Hello World 찍기 # Step에 이름 붙이는 기능
         run: echo "Hello World" # 실행시킬 명령어 작성
+
+      - name: 여러 명령어 문장 작성하기
+        run: |
+          echo "Good"
+          echo "Morning"
+      
+
+#      # 참고: https://docs.github.com/en/actions/learn-github-actions/variables
+#      - name: Github Actions 자체에 저장되어 있는 변수 사용해보기
+#        run: |
+#          echo $GITHUB_SHA
+#          echo $GITHUB_REPOSITORY
+#
+#    - name: Github Actions Secret 변수 사용해보기
+#    run: |
+#      echo ${{ secrets.MY_NAME }}
+#      echo ${{ secrets.MY_HOBBY }}
