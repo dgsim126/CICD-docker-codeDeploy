@@ -19,6 +19,9 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web' // Spring Web 추가
+    developmentOnly 'org.springframework.boot:spring-boot-devtools' // Spring Boot DevTools 추가
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
