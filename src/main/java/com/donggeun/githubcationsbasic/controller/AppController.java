@@ -8,6 +8,6 @@ public class AppController {
 
     @GetMapping("/")
     public String home() {
-        return "add application.yml";
+        return "add application.yml 수정 완료!";
     }
 }
