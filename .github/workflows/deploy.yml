@@ -23,7 +23,9 @@ jobs:
             cd /home/ubuntu/github-actions-practice # 여기 경로는 자신의 EC2에 맞는 경로로 재작성하기
             rm -rf src/main/resources/application.yml
             git pull origin main
+            mkdir -p src/main/resources # src/main/resources 디렉토리가 존재하지 않으면 생성
             echo "$APPLICATION_PROPERTIES" > src/main/resources/application.yml
+            
             ./gradlew clean build
             sudo fuser -k -n tcp 8080 || true # || true를 붙인 이유는 8080에 종료시킬 프로세스가 없더라도 실패로 처리하지 않기 위해서이다. 
             nohup java -jar build/libs/*SNAPSHOT.jar > ./output.log 2>&1 &
