@@ -8,6 +8,6 @@ public class AppController {
 
     @GetMapping("/")
     public String home() {
-        return "Test2 World";
+        return "add application.yml";
     }
 }
