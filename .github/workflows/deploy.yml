@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: SSH로 EC2에 접속하기
-        uses: appleboy/ssh-action@v1.0.3 # 사용할 라이브러리
+        uses: appleboy/ssh-action@v1.0.3
         env:
           APPLICATION_PROPERTIES: ${{ secrets.APPLICATION_PROPERTIES }}
         with:
@@ -20,10 +20,10 @@ jobs:
           envs: APPLICATION_PROPERTIES
           script_stop: true # 아래 script 중 실패하는 명령이 하나라도 있으면 실패로 처리
           script: |
-            cd /home/ubuntu/github-actions-practice 
+            cd /home/ubuntu/github-actions-practice  # 여기 경로는 자신의 EC2에 맞는 경로로 재작성하기
             rm -rf src/main/resources/application.yml
             git pull origin main
             echo "$APPLICATION_PROPERTIES" > src/main/resources/application.yml
             ./gradlew clean build
-            sudo fuser -k -n tcp 8080 || true # || true를 붙인 이유는 8080에 종료시킬 프로세스가 없더라도 실패로 처리하지 않기 위해서이다..
+            sudo fuser -k -n tcp 8080 || true # || true를 붙인 이유는 8080에 종료시킬 프로세스가 없더라도 실패로 처리하지 않기 위해서이다. 
             nohup java -jar build/libs/*SNAPSHOT.jar > ./output.log 2>&1 &
