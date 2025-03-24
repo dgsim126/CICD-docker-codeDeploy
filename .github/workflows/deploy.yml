@@ -21,17 +21,8 @@ jobs:
       - name: application.yml 파일 만들기
         run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.yml
 
-      - name: 테스트 및 빌드하기 전 gradlew 실행 권한 부여
-        run: chmod +x gradlew
-
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
-
-      - name: 빌드된 파일 이름 변경하기
-        run: mv ./build/libs/*SNAPSHOT.jar ./project.jar
-
-      - name: 압축하기
-        run: tar -czvf $GITHUB_SHA.tar.gz project.jar appspec.yml scripts
 
       - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
         uses: aws-actions/configure-aws-credentials@v4
@@ -40,12 +31,28 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: S3에 프로젝트 폴더 업로드하기
-        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.tar.gz s3://instagram-server-donggeun/$GITHUB_SHA.tar.gz
+      - name: ECR에 로그인하기
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Code Deploy를 활용해 EC2에 프로젝트 코드 배포
-        run: aws deploy create-deployment
-          --application-name instagram-server
-          --deployment-config-name CodeDeployDefault.AllAtOnce
-          --deployment-group-name Production
-          --s3-location bucket=instagram-server-donggeun,bundleType=tgz,key=$GITHUB_SHA.tar.gz
+      - name: Docker 이미지 생성
+        run: docker build -t instagram-server .
+
+      - name: Docker 이미지에 Tag 붙이기
+        run: docker tag instagram-server ${{ steps.login-ecr.outputs.registry }}/instagram-server:latest
+
+      - name: ECR에 Docker 이미지 Push하기
+        run: docker push ${{ steps.login-ecr.outputs.registry }}/instagram-server:latest
+
+      - name: SSH로 EC2에 접속하기
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            docker stop instagram-server || true
+            docker rm instagram-server || true
+            docker pull ${{ steps.login-ecr.outputs.registry }}/instagram-server:latest
+            docker run -d --name instagram-server -p 8080:8080 ${{ steps.login-ecr.outputs.registry }}/instagram-server:latest
