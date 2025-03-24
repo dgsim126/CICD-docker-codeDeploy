@@ -56,7 +56,14 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script_stop: true
           script: |
+            # ECR 로그인 먼저 수행 (필수)
+            aws ecr get-login-password --region ap-northeast-2 | \
+            docker login --username AWS --password-stdin 810456925233.dkr.ecr.ap-northeast-2.amazonaws.com
+
+            # 기존 컨테이너 종료 및 제거
             docker stop instagram-server || true
             docker rm instagram-server || true
-            docker pull ${{ steps.login-ecr.outputs.registry }}/instagram-server:latest
-            docker run -d --name instagram-server -p 8080:8080 ${{ steps.login-ecr.outputs.registry }}/instagram-server:latest
+
+            # 최신 이미지 pull 및 실행
+            docker pull 810456925233.dkr.ecr.ap-northeast-2.amazonaws.com/instagram-server:latest
+            docker run -d --name instagram-server -p 8080:8080 810456925233.dkr.ecr.ap-northeast-2.amazonaws.com/instagram-server:latest
