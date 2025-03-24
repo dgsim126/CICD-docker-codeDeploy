@@ -58,5 +58,5 @@ jobs:
           script: |
             docker stop instagram-server || true
             docker rm instagram-server || true
-            docker pull 810456925233.dkr.ecr.ap-northeast-2.amazonaws.com/instagram-server:latest
-            docker run -d --name instagram-server -p 8080:8080 810456925233.dkr.ecr.ap-northeast-2.amazonaws.com/instagram-server:latest
+            docker pull ${{ steps.login-ecr.outputs.registry }}/instagram-server:latest
+            docker run -d --name instagram-server -p 8080:8080 ${{ steps.login-ecr.outputs.registry }}/instagram-server:latest
